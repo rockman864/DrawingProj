@@ -64,6 +64,8 @@ void CDrawingProjDoc::Serialize(CArchive& ar)
 	{
 		// TODO: add loading code here
 	}
+	m_obArray.Serialize(ar);
+
 }
 
 #ifdef SHARED_HANDLERS

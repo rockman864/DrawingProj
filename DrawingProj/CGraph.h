@@ -1,5 +1,5 @@
 #pragma once
-class CGraph
+class CGraph:public CObject
 {
 public:
     DECLARE_SERIAL(CGraph)
@@ -12,6 +12,7 @@ public:
     CGraph(CPoint ptBegin, CPoint ptEnd, int DrawType);
     CGraph(void);
     ~CGraph(void);
+    virtual void Serialize(CArchive& ar);
 public:
     void SetDrawType(int nType);
     void SetBeginPoint(CPoint ptBegin);
@@ -19,6 +20,8 @@ public:
     CPoint GetBeginPoint();
     CPoint GetEndPont();
     int GetDrawType();
+    CGraph* CreateGraphObj();
+    void  DrawItem(CDC* pDC);
 private:
     CPoint m_ptBegin;
     CPoint m_ptEnd;

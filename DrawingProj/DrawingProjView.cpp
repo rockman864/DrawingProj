@@ -62,12 +62,11 @@ void CDrawingProjView::OnDraw(CDC* pDC)
 	ASSERT_VALID(pDoc);
 	if (!pDoc)
 		return;
-
-	// TODO: add draw code for native data here
-	CRect rect;
-	GetClientRect(&rect);
-	//将兼容DC的显示表面拷贝到目的DC，即显示到屏幕
-	pDC->BitBlt(0, 0, rect.Width(), rect.Height(), &m_dcCompatible, 0, 0, SRCCOPY);
+	int nCount = pDoc->m_obArray.GetCount();
+	for (int i = 0; i < nCount; i++)
+	{
+		((CGraph*)pDoc->m_obArray.GetAt(i))->DrawItem(pDC);
+	}
 }
 
 
@@ -149,51 +148,17 @@ void CDrawingProjView::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	// TODO: Add your message handler code here and/or call default
 	m_GraphInfo.SetEndPont(point);
-	CClientDC dc(this);
-	CBrush* pBrush = CBrush::FromHandle((HBRUSH)GetStockObject(NULL_BRUSH));
-	if (!m_dcCompatible.m_hDC)
+	CGraph* pNewGraph = m_GraphInfo.CreateGraphObj();
+	if (pNewGraph != NULL)
 	{
-		//1)创建兼容DC,且仅创建1个
-		m_dcCompatible.CreateCompatibleDC(&dc);
-		//2）创建兼容位图
-		CRect DrawRangle;
-		GetClientRect(&DrawRangle);
-		CBitmap bitmap;
-		bitmap.CreateCompatibleBitmap(&dc, DrawRangle.Width(), DrawRangle.Height());
-		//3）选入位图，来确定显示表面大小，从而可以在兼容DC上画图
-		m_dcCompatible.SelectObject(&bitmap);
-		//4)将原始DC中的颜色表和像素数据块复制到兼容DC
-		m_dcCompatible.BitBlt(0, 0, DrawRangle.Width(), DrawRangle.Height(), &dc, 0, 0, SRCCOPY);
-
-		m_dcCompatible.SelectObject(pBrush);
+		CDrawingProjDoc* pDoc = GetDocument();
+		if (pDoc != NULL)
+		{
+			pDoc->m_obArray.Add(pNewGraph);
+		}
 	}
-	switch (m_GraphInfo.GetDrawType())//根据菜单命令在兼容DC上画图
-	{
-	case CGraph::EN_RECT:
-	{
-		CRect rect(m_GraphInfo.GetBeginPoint(), m_GraphInfo.GetEndPont());
-		m_dcCompatible.Rectangle(&rect);
-		break;
-	}
-	case CGraph::EN_LINE:
-	{
-		m_dcCompatible.MoveTo(m_GraphInfo.GetBeginPoint());
-		m_dcCompatible.LineTo(m_GraphInfo.GetEndPont());
-		break;
-	}
-
-	case CGraph::EN_ELLIPSE:
-	{
-		CRect Ellipse(m_GraphInfo.GetBeginPoint(), m_GraphInfo.GetEndPont());
-		m_dcCompatible.Ellipse(&Ellipse);
-		break;
-	}
-	default:
-		break;
-	}
-	//窗口无效，引发重绘操作
+	//引发客户窗口无效，发生重绘，
+//图形能立即显示，但大量数据情况下频繁重绘效率下
 	Invalidate(TRUE);
-	////立即显示绘画内容
-	UpdateWindow();
 	CView::OnLButtonUp(nFlags, point);
 }

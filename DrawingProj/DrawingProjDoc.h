@@ -40,6 +40,8 @@ protected:
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	CObArray m_obArray;
 
 #ifdef SHARED_HANDLERS
 	// Helper function that sets search content for a Search Handler
